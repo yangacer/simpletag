@@ -17,9 +17,9 @@ class __CONSTS__(object):
 
     SQL_CREATE_TBL = {
             int:  'CREATE VIRTUAL TABLE IF NOT EXISTS {} USING FTS4(tags);',
-            str: 'CREATE VIRTUAL TABLE IF NOT EXISTS {} USING FTS4(docid_str, tags);'
+            str: 'CREATE VIRTUAL TABLE IF NOT EXISTS {} USING FTS4(docid_str, tags, notindexed=docid_str);'
             }
-    SQL_CREATE_AUX_TBL =  'CREATE VIRTUAL TABLE IF NOT EXISTS terms USING fts4aux({});'
+    SQL_CREATE_AUX_TBL =  'CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});'
     SQL_COL_INFO = 'PRAGMA table_info({});'
     SQL_PURGE_TBL = 'DELETE FROM {};'
     SQL_UPDATE = {
@@ -35,6 +35,7 @@ class __CONSTS__(object):
             int: 'SELECT tags FROM {} WHERE docid = ?;',
             str: 'SELECT tags FROM {} WHERE docid_str = ?;',
             }
+    SQL_STATS = 'SELECT term, documents, occurrences FROM {}_terms WHERE col="*";'
     pass
 
 def purge(name):
@@ -52,6 +53,7 @@ class ns(object):
             raise TypeError('id_type is not supported')
 
         conn = sqlite3.connect(self.dbfile) if conn is None else conn
+        conn.row_factory = sqlite3.Row
         csr = conn.cursor()
         sql = __CONSTS__.SQL_CREATE_TBL[id_type].format(name)
         csr.execute(sql)
@@ -98,20 +100,19 @@ class ns(object):
     def query_ids(self, query_str):
         sql = __CONSTS__.SQL_QUERY_IDS[self.id_type].format(self.table)
         csr = self.conn.cursor()
-        def gen():
-            for row in csr.execute(sql, (query_str,)):
-                yield row[0]
-        return [docid for docid in gen()]
+        for row in csr.execute(sql, (query_str,)):
+            yield row[0]
 
     def query_tags(self, docid):
         sql = __CONSTS__.SQL_QUERY_TAGS[self.id_type].format(self.table)
         csr = self.conn.cursor()
-        def gen():
-            for row in csr.execute(sql, (docid,)):
-                for tok in get_token(row[0]):
-                    yield tok
-        return [tok for tok in gen()]
+        for row in csr.execute(sql, (docid,)):
+            for tok in get_token(row[0]):
+                yield tok
 
     def stats(self):
-        pass
+        sql = __CONSTS__.SQL_STATS.format(self.table)
+        csr = self.conn.cursor()
+        for row in csr.execute(sql):
+            yield dict(((key, row[key]) for key in row.keys()))
 
