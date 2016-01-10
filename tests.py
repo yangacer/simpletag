@@ -5,6 +5,12 @@ import simpletag
 
 class test_simpletag(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        import sqlite3
+        print 'sqlite ver', sqlite3.sqlite_version
+        pass
+
     def setUp(self):
         self.ns = simpletag.ns('test', id_type=int)
         pass
