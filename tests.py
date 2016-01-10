@@ -5,10 +5,18 @@ import simpletag
 
 class test_simpletag(unittest.TestCase):
 
+    SQLITE_COMPILE_OPTS = []
+
     @classmethod
     def setUpClass(cls):
         import sqlite3
+        print '===='
         print 'sqlite ver', sqlite3.sqlite_version
+        print '===='
+        conn = sqlite3.connect(':memory:')
+        csr = conn.cursor()
+        cls.SQLITE_COMPILE_OPTS = [row[0] for row in csr.execute('PRAGMA compile_options;')]
+        conn.close()
         pass
 
     def setUp(self):
@@ -24,7 +32,6 @@ class test_simpletag(unittest.TestCase):
         self.ns.update(456, 'test is a MUST!')
         self.ns.update(789, u'中文 行不行')
         self.assertEqual([123, 456], [i for i in self.ns.query_ids('is')])
-        self.assertIn(456, [i for i in self.ns.query_ids('is NOT awsome')])
         self.assertIn(789, [i for i in self.ns.query_ids(u'行不行')])
         pass
 
@@ -33,8 +40,20 @@ class test_simpletag(unittest.TestCase):
         self.ns.update(456, ['test', 'is', 'a', 'MUST'])
         self.ns.update(789, [u'中文', u'行不行'])
         self.assertEqual([123, 456], [i for i in self.ns.query_ids('is')])
-        self.assertIn(456, [i for i in self.ns.query_ids('is NOT awsome')])
         self.assertIn(789, [i for i in self.ns.query_ids(u'行不行')])
+        pass
+
+    def test_set_query(self):
+        self.ns.update(123, ['simpletag', 'is', 'awsome'])
+        self.ns.update(456, ['test', 'is', 'a', 'MUST'])
+
+        query = None
+        if 'ENABLE_FTS3_PARENTHESIS' in self.SQLITE_COMPILE_OPTS:
+            query = 'is NOT awsome'
+        else:
+            query = 'is -awsome'
+
+        self.assertIn(456, [i for i in self.ns.query_ids(query)])
         pass
 
     def test_update_then_query_tags(self):
