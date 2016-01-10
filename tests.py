@@ -24,7 +24,7 @@ class test_simpletag(unittest.TestCase):
         self.ns.update(456, 'test is a MUST!')
         self.ns.update(789, u'中文 行不行')
         self.assertEqual([123, 456], [i for i in self.ns.query_ids('is')])
-        self.assertIn(456, [i for i in self.ns.query_ids('is -awsome')])
+        self.assertIn(456, [i for i in self.ns.query_ids('is NOT awsome')])
         self.assertIn(789, [i for i in self.ns.query_ids(u'行不行')])
         pass
 
@@ -33,7 +33,7 @@ class test_simpletag(unittest.TestCase):
         self.ns.update(456, ['test', 'is', 'a', 'MUST'])
         self.ns.update(789, [u'中文', u'行不行'])
         self.assertEqual([123, 456], [i for i in self.ns.query_ids('is')])
-        self.assertIn(456, [i for i in self.ns.query_ids('is -awsome')])
+        self.assertIn(456, [i for i in self.ns.query_ids('is NOT awsome')])
         self.assertIn(789, [i for i in self.ns.query_ids(u'行不行')])
         pass
 

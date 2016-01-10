@@ -38,8 +38,6 @@ class __CONSTS__(object):
     SQL_STATS = 'SELECT term, documents, occurrences FROM {}_terms WHERE col="*";'
     pass
 
-def purge(name):
-    os.remove(name)
 
 class ns(object):
 
