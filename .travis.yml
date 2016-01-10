@@ -12,4 +12,7 @@ before_install:
     - sudo apt-cache show sqlite3
     - sudo apt-get install sqlite3=3.7.15.1-1~travis1
     - sqlite3 --version
-script: nosetests -sv --with-id
+install:
+    - pip install coverage coveralls
+script: nosetests -sv --with-id --with-coverage --cover-package=simpletag --cover-branches
+after_success: coveralls
