@@ -152,8 +152,5 @@ class ns(object):
 
 if __name__ == "__main__":
     import doctest
-    import sys
-    fc, tc = doctest.testmod()
-    if fc != 0:
-        sys.exit(1)
+    doctest.testmod()
     pass

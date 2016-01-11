@@ -15,6 +15,5 @@ before_install:
 install:
     - pip install coverage coveralls
 script:
-    - nosetests -sv --with-id --with-coverage --cover-package=simpletag --cover-branches
-    - python simpletag.py
+    - nosetests -sv --with-id --with-coverage --cover-package=simpletag --cover-branches --with-doctest
 after_success: coveralls
