@@ -17,7 +17,7 @@ class __CONSTS__(object):
 
     SQL_CREATE_TBL = {
             int:  'CREATE VIRTUAL TABLE IF NOT EXISTS {} USING FTS4(tags);',
-            str: 'CREATE VIRTUAL TABLE IF NOT EXISTS {} USING FTS4(docid_str, tags, notindexed=docid_str);'
+            str: 'CREATE VIRTUAL TABLE IF NOT EXISTS {} USING FTS4(docid_str, tags);'
             }
     SQL_CREATE_AUX_TBL =  'CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});'
     SQL_COL_INFO = 'PRAGMA table_info({});'
@@ -33,9 +33,12 @@ class __CONSTS__(object):
 
     SQL_QUERY_TAGS = {
             int: 'SELECT tags FROM {} WHERE docid = ?;',
-            str: 'SELECT tags FROM {} WHERE docid_str = ?;',
+            str: 'SELECT tags FROM {} WHERE docid_str MATCH ?;',
             }
-    SQL_STATS = 'SELECT term, documents, occurrences FROM {}_terms WHERE col="*";'
+    SQL_STATS = {
+        int: 'SELECT term, documents, occurrences FROM {}_terms WHERE col=0;',
+        str: 'SELECT term, documents, occurrences FROM {}_terms WHERE col=1;',
+    }
     pass
 
 
@@ -109,7 +112,7 @@ class ns(object):
                 yield tok
 
     def stats(self):
-        sql = __CONSTS__.SQL_STATS.format(self.table)
+        sql = __CONSTS__.SQL_STATS[self.id_type].format(self.table)
         csr = self.conn.cursor()
         for row in csr.execute(sql):
             yield dict(((key, row[key]) for key in row.keys()))

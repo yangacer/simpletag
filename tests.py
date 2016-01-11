@@ -21,10 +21,29 @@ class test_simpletag(unittest.TestCase):
 
     def setUp(self):
         self.ns = simpletag.ns('test', id_type=int)
+        self.ns_str = simpletag.ns('test_str', id_type=str)
         pass
 
     def tearDown(self):
         self.ns.purge()
+        self.ns_str.purge()
+        pass
+
+    def test_open_failure(self):
+
+        with self.assertRaises(TypeError):
+            simpletag.ns('noop', id_type=None)
+
+        with self.assertRaises(TypeError):
+            simpletag.ns('test', id_type=str)
+
+        pass
+
+    def test_update_failure(self):
+
+        with self.assertRaises(TypeError):
+            self.ns.update('invalid', 'noop')
+
         pass
 
     def test_update_str_then_query_ids(self):
@@ -80,4 +99,12 @@ class test_simpletag(unittest.TestCase):
                 dict(term=u'行不行',    documents=1, occurrences=1),
                 ]
         self.assertEqual(expected, [st for st in self.ns.stats()])
+        pass
+
+    def test_str_stats(self):
+        self.ns_str.update('/test-str/123', 'nothing')
+        expected = [
+                dict(term='nothing', documents=1, occurrences=1),
+        ]
+        self.assertEqual(expected, [st for st in self.ns_str.stats()])
         pass
