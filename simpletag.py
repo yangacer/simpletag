@@ -51,7 +51,7 @@ class ns(object):
     """
     >>> import simpletag
 
-    >>> ns = simpletag.ns('myTagSpace', id_type=str)
+    >>> ns = simpletag.ns('myTagSpace')
 
     >>> doc_1 = 1
     >>> tags_1 = ['tag']
