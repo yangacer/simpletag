@@ -23,6 +23,10 @@ class __CONSTS__(object):
     SQL_CREATE_AUX_TBL =  'CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});'
     SQL_COL_INFO = 'PRAGMA table_info({});'
     SQL_PURGE_TBL = 'DELETE FROM {};'
+    SQL_DEL = {
+        int: 'DELETE FROM {} WHERE docid = ?;',
+        str: 'DELETE FROM {} WHERE docid_str MATCH ?;',
+    }
     SQL_UPDATE = {
         int: 'INSERT INTO {} (docid, tags) VALUES (?,?);',
         str: 'INSERT INTO {} (docid_str, tags) VALUES (?, ?);',
@@ -116,8 +120,12 @@ class ns(object):
         if not isinstance(tag_str, str) and not isinstance(tag_str, unicode):
             tag_str = ' '.join(tag_str)
 
-        sql = __CONSTS__.SQL_UPDATE[self.id_type].format(self.table)
         csr = self.conn.cursor()
+        sql = __CONSTS__.SQL_DEL[self.id_type].format(self.table)
+
+        csr.execute(sql, (ident,))
+
+        sql = __CONSTS__.SQL_UPDATE[self.id_type].format(self.table)
         csr.execute(sql, (ident, tag_str))
         self.conn.commit()
         pass
