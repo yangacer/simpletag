@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sqlite3
 import os
 
@@ -23,8 +24,8 @@ class __CONSTS__(object):
     SQL_COL_INFO = 'PRAGMA table_info({});'
     SQL_PURGE_TBL = 'DELETE FROM {};'
     SQL_UPDATE = {
-        int: 'INSERT OR REPLACE INTO {} (docid, tags) VALUES (?,?);',
-        str: 'INSERT OR REPLACE INTO {} (docid_str, tags) VALUES (?, ?);',
+        int: 'INSERT INTO {} (docid, tags) VALUES (?,?);',
+        str: 'INSERT INTO {} (docid_str, tags) VALUES (?, ?);',
         }
     SQL_QUERY_IDS = {
             int: 'SELECT docid FROM {} WHERE tags MATCH ?;',
@@ -43,6 +44,29 @@ class __CONSTS__(object):
 
 
 class ns(object):
+    """
+    >>> import simpletag
+
+    >>> ns = simpletag.ns('myTagSpace', id_type=str)
+
+    >>> doc_1 = 1
+    >>> tags_1 = ['tag']
+
+    >>> doc_2 = 2
+    >>> tags_2 = 'tag simple!'
+
+    >>> ns.update(doc_1, tags_1)
+    >>> ns.update(doc_2, tags_2)
+
+    >>> print [ doc for doc in ns.query_ids('tag') ]
+    [1, 2]
+
+    >>> print [ tag for tag in ns.query_tags(doc_1) ]
+    [u'tag']
+
+    >>> print [ st for st in ns.stats() ]
+    [{'term': u'simple', 'documents': 1, 'occurrences': 1}, {'term': u'tag', 'documents': 2, 'occurrences': 2}]
+    """
 
     dbfile = 'simpletag.db'
     table = None
@@ -117,3 +141,7 @@ class ns(object):
         for row in csr.execute(sql):
             yield dict(((key, row[key]) for key in row.keys()))
 
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
