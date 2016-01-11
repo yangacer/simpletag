@@ -150,7 +150,3 @@ class ns(object):
             yield dict(((key, row[key]) for key in row.keys()))
 
 
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    pass
