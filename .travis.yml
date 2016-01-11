@@ -14,5 +14,7 @@ before_install:
     - sqlite3 --version
 install:
     - pip install coverage coveralls
-script: nosetests -sv --with-id --with-coverage --cover-package=simpletag --cover-branches
+script:
+    - nosetests -sv --with-id --with-coverage --cover-package=simpletag --cover-branches
+    - python simpletag.py
 after_success: coveralls
