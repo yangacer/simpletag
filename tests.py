@@ -20,8 +20,8 @@ class test_simpletag(unittest.TestCase):
         pass
 
     def setUp(self):
-        self.ns = simpletag.ns('test', id_type=int)
-        self.ns_str = simpletag.ns('test_str', id_type=str)
+        self.ns = simpletag.IntNS('test')
+        self.ns_str = simpletag.TextNS('test_str')
         pass
 
     def tearDown(self):
@@ -29,20 +29,29 @@ class test_simpletag(unittest.TestCase):
         self.ns_str.purge()
         pass
 
+    def test_invalid_init(self):
+
+        with self.assertRaises(NotImplementedError):
+            simpletag.ns()
+
+        pass
+
     def test_open_failure(self):
 
         with self.assertRaises(TypeError):
-            simpletag.ns('noop', id_type=None)
+            simpletag.TextNS('test')
 
         with self.assertRaises(TypeError):
-            simpletag.ns('test', id_type=str)
-
+            simpletag.IntNS('test_str')
         pass
 
     def test_update_failure(self):
 
         with self.assertRaises(TypeError):
             self.ns.update('invalid', 'noop')
+
+        with self.assertRaises(TypeError):
+            self.ns_str.update(1, 'noop')
 
         pass
 
