@@ -21,12 +21,22 @@ class __CONSTS__(object):
     SQL_STATS = 'SELECT term, documents, occurrences FROM {}_terms WHERE col=0;'
     pass
 
-
 class ns(object):
 
     dbfile = 'simpletag.db'
     table = None
     conn = None
+    using_parenthesis_query = False
+
+    def resolve_supported_level(self):
+        sql = 'PRAGMA compile_options;'
+        csr = self.conn.cursor()
+        opts = [row[0] for row in csr.execute(sql)]
+        if 'ENABLE_FTS3' not in opts:
+            raise RuntimeError('SQLite''s FTS is not enabled')
+        if 'ENABLE_FTS3_PARENTHESIS' in opts:
+            self.using_parenthesis_query = True
+        pass
 
     def get_existing_tbl_type(self, name):
         sql = 'select name from sqlite_master where type = "table";'
@@ -40,6 +50,7 @@ class ns(object):
         conn = sqlite3.connect(self.dbfile)
         conn.row_factory = sqlite3.Row
         self.conn = conn
+        self.resolve_supported_level()
         pass
 
     def open_table_(self, name):

@@ -13,10 +13,6 @@ class test_simpletag(unittest.TestCase):
         print '===='
         print 'sqlite ver', sqlite3.sqlite_version
         print '===='
-        conn = sqlite3.connect(':memory:')
-        csr = conn.cursor()
-        cls.SQLITE_COMPILE_OPTS = [row[0] for row in csr.execute('PRAGMA compile_options;')]
-        conn.close()
         pass
 
     def setUp(self):
@@ -69,6 +65,13 @@ class test_simpletag(unittest.TestCase):
         self.ns.update(789, [u'中文', u'行不行'])
         self.assertEqual([123, 456], [i for i in self.ns.query_ids('is')])
         self.assertIn(789, [i for i in self.ns.query_ids(u'行不行')])
+
+    def test_update_list_then_query_str_ids(self):
+        self.ns_str.update('/a/b', ['simpletag', 'is', 'awsome'])
+        self.ns_str.update('/', ['test', 'is', 'a', 'MUST'])
+        self.ns_str.update('/b/a', [u'中文', u'行不行'])
+        self.assertEqual(['/a/b', '/'], [i for i in self.ns_str.query_ids('is')])
+        self.assertIn('/b/a', [i for i in self.ns_str.query_ids(u'行不行')])
         pass
 
     def test_set_query(self):
@@ -76,7 +79,7 @@ class test_simpletag(unittest.TestCase):
         self.ns.update(456, ['test', 'is', 'a', 'MUST'])
 
         query = None
-        if 'ENABLE_FTS3_PARENTHESIS' in self.SQLITE_COMPILE_OPTS:
+        if self.ns.using_parenthesis_query:
             query = 'is NOT awsome'
         else:
             query = 'is -awsome'

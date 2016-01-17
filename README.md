@@ -38,7 +38,6 @@
 ## TODOs
 
 - As a Flask plug-in
-- Aware of underlying SQLite FTS query syntax (flag for detection, at least)
 - PyPI (?
 - Benchmark
 - Further tags analytics (e.g. top-k ~ KNN classification)
