@@ -2,6 +2,11 @@
 
 [![Build Status](https://travis-ci.org/yangacer/simpletag.svg?branch=master)](https://travis-ci.org/yangacer/simpletag)
 [![Coverage Status](https://coveralls.io/repos/yangacer/simpletag/badge.svg?branch=master&service=github)](https://coveralls.io/github/yangacer/simpletag?branch=master)
+[![PyPi](https://img.shields.io/pypi/v/simpletag.svg)](https://pypi.python.org/pypi/simpletag)
+
+## Source
+
+https://github.com/yangacer/simpletag
 
 ## Usage
 
@@ -39,7 +44,6 @@
 ## TODOs
 
 - As a Flask plug-in
-- PyPI (?
 - Benchmark
 - Further tags analytics (e.g. top-k ~ KNN classification)
 

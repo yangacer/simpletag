@@ -3,6 +3,12 @@ SimpleTag
 
 | |Build Status|
 | |Coverage Status|
+| |PyPi|
+
+Source
+------
+
+https://github.com/yangacer/simpletag
 
 Usage
 -----
@@ -42,7 +48,6 @@ TODOs
 -----
 
 -  As a Flask plug-in
--  PyPI (?
 -  Benchmark
 -  Further tags analytics (e.g. top-k ~ KNN classification)
 
@@ -50,3 +55,5 @@ TODOs
    :target: https://travis-ci.org/yangacer/simpletag
 .. |Coverage Status| image:: https://coveralls.io/repos/yangacer/simpletag/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/yangacer/simpletag?branch=master
+.. |PyPi| image:: https://img.shields.io/pypi/v/simpletag.svg
+   :target: https://pypi.python.org/pypi/simpletag
