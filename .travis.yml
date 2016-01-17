@@ -13,8 +13,9 @@ before_install:
     - sudo apt-get install sqlite3=3.7.15.1-1~travis1
     - sqlite3 --version
 install:
-    - pip install coverage coveralls
+    - pip install coverage coveralls flake8
 script:
     - nosetests -sv --with-id --with-coverage --cover-package=simpletag --cover-branches --with-doctest
     - nosetests -sv --with-id --with-coverage --cover-package=simpletag --cover-branches --with-doctest
+    - flake8 simpletag.py
 after_success: coveralls

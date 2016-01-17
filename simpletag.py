@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sqlite3
-import os
+
 
 def get_token(text):
     out = ''
@@ -14,12 +14,16 @@ def get_token(text):
         yield out
     pass
 
+
 class __CONSTS__(object):
 
     SQL_COL_INFO = 'PRAGMA table_info({});'
     SQL_PURGE_TBL = 'DELETE FROM {};'
-    SQL_STATS = 'SELECT term, documents, occurrences FROM {}_terms WHERE col=0;'
+    SQL_STATS = '''
+    SELECT term, documents, occurrences FROM {}_terms WHERE col=0;
+    '''
     pass
+
 
 class ns(object):
 
@@ -111,8 +115,9 @@ class TextNS(ns):
     >>> print [ tag for tag in ns.query_tags(doc_1) ]
     [u'tag']
 
-    >>> print [ st for st in ns.stats() ]
-    [{'term': u'simple', 'documents': 1, 'occurrences': 1}, {'term': u'tag', 'documents': 2, 'occurrences': 2}]
+    >>> print [ st for st in ns.stats() ] # doctest: +NORMALIZE_WHITESPACE
+    [{'term': u'simple', 'documents': 1, 'occurrences': 1},
+            {'term': u'tag', 'documents': 2, 'occurrences': 2}]
 
     >>> ns.purge()
     """
@@ -125,23 +130,32 @@ class TextNS(ns):
             raise TypeError(name)
 
         self.__sql__ = dict(
-            SQL_CREATE_TBL = '''
+            SQL_CREATE_TBL='''
             CREATE VIRTUAL TABLE IF NOT EXISTS {0} USING FTS4(tags);
-            CREATE TABLE IF NOT EXISTS {0}_text_id (textid TEXT UNIQUE PRIMARY KEY NOT NULL);
+            CREATE TABLE IF NOT EXISTS {0}_text_id (
+                textid TEXT UNIQUE PRIMARY KEY NOT NULL);
             CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});
             ''',
-            SQL_INSERT = 'INSERT OR REPLACE INTO {}_text_id VALUES(?);',
-            SQL_UPDATE_1 = 'DELETE FROM {} WHERE docid = ?;',
-            SQL_UPDATE_2 = 'INSERT INTO {} (docid, tags) VALUES (?, ?);',
-            SQL_PURGE_TBL = 'DELETE FROM {0}; DELETE FROM {0}_text_id;',
-            SQL_DEL = 'DELETE FROM {0} WHERE docid = (SELECT rowid FROM {0}_text_id WHERE textid = ?);',
-            SQL_QUERY_IDS = '''
-            SELECT * FROM {0}_text_id as lhs
-            JOIN (SELECT docid FROM {0} WHERE tags MATCH ?) AS rhs
-            ON (lhs.rowid = rhs.docid);
+            SQL_INSERT='INSERT OR REPLACE INTO {}_text_id VALUES(?);',
+            SQL_UPDATE_1='DELETE FROM {} WHERE docid=?;',
+            SQL_UPDATE_2='INSERT INTO {} (docid, tags) VALUES (?, ?);',
+            SQL_PURGE_TBL='DELETE FROM {0}; DELETE FROM {0}_text_id;',
+            SQL_DEL='''
+            DELETE FROM {0} WHERE docid=(
+                SELECT rowid FROM {0}_text_id WHERE textid=?);
             ''',
-            SQL_QUERY_TAGS = 'SELECT tags FROM {0} WHERE docid = (SELECT rowid FROM {0}_text_id WHERE textid = ?);',
-            SQL_STATS = 'SELECT term, documents, occurrences FROM {}_terms WHERE col=0;'
+            SQL_QUERY_IDS='''
+            SELECT * FROM {0}_text_id as lhs
+                JOIN (SELECT docid FROM {0} WHERE tags MATCH ?) AS rhs
+                ON (lhs.rowid=rhs.docid);
+            ''',
+            SQL_QUERY_TAGS='''
+            SELECT tags FROM {0} WHERE docid=(
+                SELECT rowid FROM {0}_text_id WHERE textid=?);
+            ''',
+            SQL_STATS='''
+            SELECT term, documents, occurrences FROM {}_terms WHERE col=0;
+            '''
         )
 
         self.open_table_(name)
@@ -169,6 +183,7 @@ class TextNS(ns):
 
     pass
 
+
 class IntNS(ns):
     """
     >>> import simpletag
@@ -190,8 +205,9 @@ class IntNS(ns):
     >>> print [ tag for tag in ns.query_tags(doc_1) ]
     [u'tag']
 
-    >>> print [ st for st in ns.stats() ]
-    [{'term': u'simple', 'documents': 1, 'occurrences': 1}, {'term': u'tag', 'documents': 2, 'occurrences': 2}]
+    >>> print [ st for st in ns.stats() ] # doctest: +NORMALIZE_WHITESPACE
+    [{'term': u'simple', 'documents': 1, 'occurrences': 1},
+            {'term': u'tag', 'documents': 2, 'occurrences': 2}]
 
     >>> ns.purge()
     """
@@ -204,17 +220,19 @@ class IntNS(ns):
             raise TypeError(name)
 
         self.__sql__ = dict(
-            SQL_CREATE_TBL = '''
-                CREATE VIRTUAL TABLE IF NOT EXISTS {0} USING FTS4(tags);
-                CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});
-                ''',
-            SQL_UPDATE_1 = 'DELETE FROM {} WHERE docid = ?;',
-            SQL_UPDATE_2 = 'INSERT INTO {} (docid, tags) VALUES (?, ?);',
-            SQL_PURGE_TBL = 'DELETE FROM {0};',
-            SQL_DEL = 'DELETE FROM {} WHERE docid = ?;',
-            SQL_QUERY_IDS = 'SELECT docid FROM {0} WHERE tags MATCH ?;',
-            SQL_QUERY_TAGS = 'SELECT tags FROM {} WHERE docid = ?;',
-            SQL_STATS = 'SELECT term, documents, occurrences FROM {}_terms WHERE col=0;',
+            SQL_CREATE_TBL='''
+            CREATE VIRTUAL TABLE IF NOT EXISTS {0} USING FTS4(tags);
+            CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});
+            ''',
+            SQL_UPDATE_1='DELETE FROM {} WHERE docid=?;',
+            SQL_UPDATE_2='INSERT INTO {} (docid, tags) VALUES (?, ?);',
+            SQL_PURGE_TBL='DELETE FROM {0};',
+            SQL_DEL='DELETE FROM {} WHERE docid=?;',
+            SQL_QUERY_IDS='SELECT docid FROM {0} WHERE tags MATCH ?;',
+            SQL_QUERY_TAGS='SELECT tags FROM {} WHERE docid=?;',
+            SQL_STATS='''
+            SELECT term, documents, occurrences FROM {}_terms WHERE col=0;
+            ''',
         )
 
         self.open_table_(name)

@@ -8,7 +8,8 @@
 ```
 >>> import simpletag
 
->>> ns = simpletag.TextNS('myTextTagSpace') # Create a namespace
+>>> ns = simpletag.TextNS('myTextTagSpace') # Create a namespace of text IDs
+... # Create integer IDs namespace with `simpletag.IntNS()`
 
 >>> doc_1 = '/a/b'
 >>> tags_1 = ['tag']
