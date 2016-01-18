@@ -1,8 +1,6 @@
 # SimpleTag
 
-[![Build Status](https://travis-ci.org/yangacer/simpletag.svg?branch=master)](https://travis-ci.org/yangacer/simpletag)
-[![Coverage Status](https://coveralls.io/repos/yangacer/simpletag/badge.svg?branch=master&service=github)](https://coveralls.io/github/yangacer/simpletag?branch=master)
-[![PyPi](https://img.shields.io/pypi/v/simpletag.svg)](https://pypi.python.org/pypi/simpletag)
+[![Build Status](https://travis-ci.org/yangacer/simpletag.svg?branch=master)](https://travis-ci.org/yangacer/simpletag) [![Coverage Status](https://coveralls.io/repos/yangacer/simpletag/badge.svg?branch=master&service=github)](https://coveralls.io/github/yangacer/simpletag?branch=master) [![PyPi](https://img.shields.io/pypi/v/simpletag.svg)](https://pypi.python.org/pypi/simpletag)
 
 ## Source
 
@@ -40,6 +38,31 @@ https://github.com/yangacer/simpletag
 
 >>> ns.purge()
 ```
+
+## Tag Query
+
+Perform tag set query thru SQLite FTS query syntax.
+
+```
+>>> ns.update(1, [u'民主', u'自由'])
+>>> ns.update(2, [u'民主', u'Cxin123'])
+
+>>> query  = ''
+... # Query IDs of tags '民主' but not 'Cxin*' (tags start with Cxin)
+
+>>> if ns.using_parenthesis_query:
+>>>     query = u'民主 NOT Cxin*'
+>>> else:
+>>>     query = u'民主 -Cxin*'
+
+>>> print [tag for tag in ns.query_ids(query)]
+[1]
+
+```
+
+> **NOTE**
+> SQLite supports `standard` and `parenthesis` syntax, and the two are enabled mutual exclusively at compiling SQLite.
+> Detect which one being used thru `simpletag.ns.using_parenthesis`.
 
 ## TODOs
 

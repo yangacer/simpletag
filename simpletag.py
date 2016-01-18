@@ -2,7 +2,7 @@
 import sqlite3
 
 __author__ = 'Acer.Yang <yangacer@gmail.com>'
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 def get_token(text):

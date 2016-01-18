@@ -1,9 +1,7 @@
 SimpleTag
 =========
 
-| |Build Status|
-| |Coverage Status|
-| |PyPi|
+|Build Status| |Coverage Status| |PyPi|
 
 Source
 ------
@@ -43,6 +41,33 @@ Usage
     }]
 
     >>> ns.purge()
+
+Tag Query
+---------
+
+Perform tag set query thru SQLite FTS query syntax.
+
+::
+
+    >>> ns.update(1, [u'民主', u'自由'])
+    >>> ns.update(2, [u'民主', u'Cxin123'])
+
+    >>> query  = '' 
+    ... # Query IDs of tags '民主' but not 'Cxin*' (tags start with Cxin)
+
+    >>> if ns.using_parenthesis_query:
+    >>>     query = u'民主 NOT Cxin*'
+    >>> else:
+    >>>     query = u'民主 -Cxin*'
+
+    >>> print [tag for tag in ns.query_ids(query)]
+    [1]
+
+    | **NOTE**
+    | SQLite supports ``standard`` and ``parenthesis`` syntax, and the
+      two are enabled mutual exclusively at compiling SQLite.
+    | Detect which one being used thru
+      ``simpletag.ns.using_parenthesis``.
 
 TODOs
 -----
