@@ -45,14 +45,14 @@ Usage
 Tag Query
 ---------
 
-Perform tag set query thru SQLite FTS query syntax.
+Tag set query with SQLite FTS query syntax.
 
 ::
 
     >>> ns.update(1, [u'民主', u'自由'])
     >>> ns.update(2, [u'民主', u'Cxin123'])
 
-    >>> query  = '' 
+    >>> query  = ''
     ... # Query IDs of tags '民主' but not 'Cxin*' (tags start with Cxin)
 
     >>> if ns.using_parenthesis_query:
@@ -63,11 +63,14 @@ Perform tag set query thru SQLite FTS query syntax.
     >>> print [tag for tag in ns.query_ids(query)]
     [1]
 
-    | **NOTE**
-    | SQLite supports ``standard`` and ``parenthesis`` syntax, and the
-      two are enabled mutual exclusively at compiling SQLite.
+    | **NOTE** SQLite supports ``standard`` and ``parenthesis`` syntax,
+      and the two are
+    | enabled mutual exclusively at compiling SQLite.
     | Detect which one being used thru
       ``simpletag.ns.using_parenthesis``.
+    | See `SQLite
+      documentation <http://www.sqlite.org/fts3.html#section_3>`__ for
+    | further information.
 
 TODOs
 -----
