@@ -60,7 +60,7 @@ Tag set query with SQLite FTS query syntax.
 
 ```
 
-> **NOTE** SQLite supports `standard` and `parenthesis` syntax, and the two are
+**NOTE** SQLite supports `standard` and `parenthesis` syntax, and the two are
 enabled mutual exclusively at compiling SQLite.
 Detect which one being used thru `simpletag.ns.using_parenthesis`.
 See [SQLite documentation](http://www.sqlite.org/fts3.html#section_3) for

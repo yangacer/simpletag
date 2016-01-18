@@ -63,14 +63,13 @@ Tag set query with SQLite FTS query syntax.
     >>> print [tag for tag in ns.query_ids(query)]
     [1]
 
-    | **NOTE** SQLite supports ``standard`` and ``parenthesis`` syntax,
-      and the two are
-    | enabled mutual exclusively at compiling SQLite.
-    | Detect which one being used thru
-      ``simpletag.ns.using_parenthesis``.
-    | See `SQLite
-      documentation <http://www.sqlite.org/fts3.html#section_3>`__ for
-    | further information.
+| **NOTE** SQLite supports ``standard`` and ``parenthesis`` syntax, and
+  the two are
+| enabled mutual exclusively at compiling SQLite.
+| Detect which one being used thru ``simpletag.ns.using_parenthesis``.
+| See `SQLite
+  documentation <http://www.sqlite.org/fts3.html#section_3>`__ for
+| further information.
 
 TODOs
 -----
