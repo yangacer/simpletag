@@ -64,12 +64,10 @@ Tag set query with SQLite FTS query syntax.
     [1]
 
 | **NOTE** SQLite supports ``standard`` and ``parenthesis`` syntax, and
-  the two are
-| enabled mutual exclusively at compiling SQLite.
-| Detect which one being used thru ``simpletag.ns.using_parenthesis``.
-| See `SQLite
+  the two are enabled mutual exclusively at compiling SQLite. Detect which one
+  being used thru ``simpletag.ns.using_parenthesis``. See `SQLite
   documentation <http://www.sqlite.org/fts3.html#section_3>`__ for
-| further information.
+  further information.
 
 TODOs
 -----
