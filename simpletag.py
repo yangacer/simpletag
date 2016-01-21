@@ -2,7 +2,7 @@
 import sqlite3
 
 __author__ = 'Acer.Yang <yangacer@gmail.com>'
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
 def get_token(text):
@@ -134,10 +134,16 @@ class TextNS(ns):
 
         self.__sql__ = dict(
             SQL_CREATE_TBL='''
+            PRAGMA recursive_triggers='ON';
             CREATE VIRTUAL TABLE IF NOT EXISTS {0} USING FTS4(tags);
             CREATE TABLE IF NOT EXISTS {0}_text_id (
                 textid TEXT UNIQUE PRIMARY KEY NOT NULL);
             CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});
+            CREATE TRIGGER IF NOT EXISTS {0}_del_text_id
+                AFTER DELETE ON {0}_text_id
+                BEGIN
+                    DELETE FROM {0} WHERE docid=OLD.rowid;
+                END;
             ''',
             SQL_INSERT='INSERT OR REPLACE INTO {}_text_id VALUES(?);',
             SQL_UPDATE_1='DELETE FROM {} WHERE docid=?;',

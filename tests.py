@@ -74,6 +74,27 @@ class test_simpletag(unittest.TestCase):
         self.assertIn('/b/a', [i for i in self.ns_str.query_ids(u'行不行')])
         pass
 
+    def find_rowid(self, ns, textid):
+        csr = ns.conn.cursor()
+        sql = 'select rowid from {}_text_id where textid =?'.format(
+            ns.table)
+        for row in csr.execute(sql, (textid,)):
+            return row[0]
+
+    def is_docid_in(self, ns, docid):
+        csr = ns.conn.cursor()
+        sql = 'select count(*) from {} where docid=?'.format(ns.table)
+        for row in csr.execute(sql, (docid,)):
+            return row[0] != 0
+
+    def test_update_str_id(self):
+        self.ns_str.update('/a/b', ['simpletag', 'is', 'awsome'])
+        lastrowid = self.find_rowid(self.ns_str, '/a/b')
+        self.ns_str.update('/', ['test', 'is', 'a', 'MUST'])
+        self.ns_str.update('/a/b', ['is', 'awsome'])
+        self.assertFalse(self.is_docid_in(self.ns_str, lastrowid))
+        pass
+
     def test_set_query(self):
         self.ns.update(123, ['simpletag', 'is', 'awsome'])
         self.ns.update(456, ['test', 'is', 'a', 'MUST'])
