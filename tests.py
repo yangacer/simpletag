@@ -117,6 +117,38 @@ class test_simpletag(unittest.TestCase):
         self.assertEqual([u'中文', u'行不行'], [i for i in self.ns.query_tags(789)])
         pass
 
+    def test_update_then_query_by_tags_tokenize(self):
+        self.ns.update(123, 'simpletag is awsome!')
+        self.ns.update(456, 'test is a MUST!')
+        self.assertEqual([(123, ['simpletag', 'is', 'awsome']),
+                          (456, ['test', 'is', 'a', 'MUST']), ],
+                         [i for i in self.ns.query_by_tags('is')])
+        pass
+
+    def test_update_then_query_by_tags_tokenize_str(self):
+        self.ns_str.update('/a/b', 'simpletag is awsome!')
+        self.ns_str.update('/b/a', 'test is a MUST!')
+        self.assertEqual([('/a/b', ['simpletag', 'is', 'awsome']),
+                          ('/b/a', ['test', 'is', 'a', 'MUST']), ],
+                         [i for i in self.ns_str.query_by_tags('is')])
+        pass
+
+    def test_update_then_query_by_tags_none_tokenize(self):
+        self.ns.update(123, 'simpletag is awsome!')
+        self.ns.update(456, 'test is a MUST!')
+        self.assertEqual([(123, 'simpletag is awsome!'),
+                          (456, 'test is a MUST!'), ],
+                         [i for i in self.ns.query_by_tags('is', False)])
+        pass
+
+    def test_update_then_query_by_tags_none_tokenize_str(self):
+        self.ns_str.update('/a/b', 'simpletag is awsome!')
+        self.ns_str.update('/b/a', 'test is a MUST!')
+        self.assertEqual([('/a/b', 'simpletag is awsome!'),
+                          ('/b/a', 'test is a MUST!'), ],
+                         [i for i in self.ns_str.query_by_tags('is', False)])
+        pass
+
     def test_stats(self):
         self.ns.update(123, 'simpletag is awsome!')
         self.ns.update(456, 'test is a MUST!')

@@ -2,7 +2,7 @@
 import sqlite3
 
 __author__ = 'Acer.Yang <yangacer@gmail.com>'
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 
 def get_token(text):
@@ -82,6 +82,15 @@ class ns(object):
         for row in csr.execute(sql, (query_str,)):
             yield row[0]
 
+    def query_by_tags(self, query_str, tokenize=True):
+        sql = self.__sql__['SQL_QUERY_BY_TAGS']
+        csr = self.conn.cursor()
+        for row in csr.execute(sql, (query_str, )):
+            if tokenize is True:
+                yield row[0], [tok for tok in get_token(row[1])]
+            else:
+                yield row[0], row[1]
+
     def query_tags(self, docid):
         sql = self.__sql__['SQL_QUERY_TAGS']
         csr = self.conn.cursor()
@@ -154,9 +163,13 @@ class TextNS(ns):
                 SELECT rowid FROM {0}_text_id WHERE textid=?);
             ''',
             SQL_QUERY_IDS='''
-            SELECT * FROM {0}_text_id as lhs
+            SELECT * FROM {0}_text_id AS lhs
                 JOIN (SELECT docid FROM {0} WHERE tags MATCH ?) AS rhs
                 ON (lhs.rowid=rhs.docid);
+            ''',
+            SQL_QUERY_BY_TAGS='''
+            SELECT * FROM {0}_text_id, {0} WHERE {0}.tags MATCH ? AND
+                {0}_text_id.rowid = {0}.docid;
             ''',
             SQL_QUERY_TAGS='''
             SELECT tags FROM {0} WHERE docid=(
@@ -238,6 +251,9 @@ class IntNS(ns):
             SQL_PURGE_TBL='DELETE FROM {0};',
             SQL_DEL='DELETE FROM {} WHERE docid=?;',
             SQL_QUERY_IDS='SELECT docid FROM {0} WHERE tags MATCH ?;',
+            SQL_QUERY_BY_TAGS='''
+            SELECT docid, tags FROM {0} WHERE tags MATCH ?;
+            ''',
             SQL_QUERY_TAGS='SELECT tags FROM {} WHERE docid=?;',
             SQL_STATS='''
             SELECT term, documents, occurrences FROM {}_terms WHERE col=0;
