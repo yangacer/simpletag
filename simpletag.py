@@ -2,7 +2,7 @@
 import sqlite3
 
 __author__ = 'Acer.Yang <yangacer@gmail.com>'
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 
 
 def get_token(text):
@@ -184,7 +184,7 @@ class TextNS(ns):
         pass
 
     def update(self, ident, tags):
-        if not isinstance(ident, str):
+        if not isinstance(ident, str) and not isinstance(ident, unicode):
             raise TypeError('Invalid ident type')
 
         if not isinstance(tags, str) and not isinstance(tags, unicode):

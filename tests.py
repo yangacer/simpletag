@@ -143,9 +143,9 @@ class test_simpletag(unittest.TestCase):
 
     def test_update_then_query_by_tags_none_tokenize_str(self):
         self.ns_str.update('/a/b', 'simpletag is awsome!')
-        self.ns_str.update('/b/a', 'test is a MUST!')
+        self.ns_str.update(u'/b/a', 'test is a MUST!')
         self.assertEqual([('/a/b', 'simpletag is awsome!'),
-                          ('/b/a', 'test is a MUST!'), ],
+                          (u'/b/a', 'test is a MUST!'), ],
                          [i for i in self.ns_str.query_by_tags('is', False)])
         pass
 
@@ -173,3 +173,4 @@ class test_simpletag(unittest.TestCase):
         ]
         self.assertEqual(expected, [st for st in self.ns_str.stats()])
         pass
+
