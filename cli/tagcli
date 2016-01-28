@@ -1,0 +1,38 @@
+#! /usr/bin/env python
+
+import click
+import simpletag
+
+@click.group()
+def main():
+    pass
+
+@main.command()
+@click.option('-n', '--name')
+@click.option('--strid/--no-strid', default=True)
+def create(name, strid):
+    simpletag.TextNS(name) if strid else simpletag.IntNS(name)
+    pass
+
+@main.command()
+@click.option('-n', '--name')
+@click.option('-i', '--ident')
+@click.option('--strid/--no-strid', default=True)
+@click.argument('tags', nargs=-1)
+def update(name, ident, strid, tags):
+    ns = simpletag.TextNS(name) if strid else simpletag.IntNS(name)
+    ns.update(ident, tags)
+    pass
+
+@main.command()
+@click.option('-n', '--name')
+@click.option('--strid/--no-strid', default=True)
+@click.argument('querystr', nargs=1)
+def query(name, strid, querystr):
+    ns = simpletag.TextNS(name) if strid else simpletag.IntNS(name)
+    for rec in ns.query_by_tags(querystr):
+        print rec
+    pass
+
+if __name__ == '__main__':
+    main()
