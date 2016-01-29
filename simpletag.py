@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import math
 import sqlite3
 
 __author__ = 'Acer.Yang <yangacer@gmail.com>'
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 
 
 def get_token(text):
@@ -102,8 +103,58 @@ class ns(object):
         csr = self.conn.cursor()
         for row in csr.execute(__CONSTS__.SQL_STATS.format(self.table)):
             yield dict(((key, row[key]) for key in row.keys()))
+            pass
+        pass
+
+    def build_weight(self):
+        csr_term = self.conn.cursor()
+        csr_docs = self.conn.cursor()
+        csr_modify = self.conn.cursor()
+        total_doc_num = 0
+
+        for row in csr_term.execute('SELECT value FROM {}_stat'.format(self.table)):
+            _, total_doc_num = decode_fts_varint(row[0])
+
+        lg2_total_doc_num = math.log(total_doc_num, 2)
+
+        csr_modify.execute('DELETE FROM {}_weight'.format(self.table));
+
+        for term_rec in csr_term.execute(__CONSTS__.SQL_STATS.format(self.table)):
+
+            for doc_rec in csr_docs.execute('SELECT * from {}_docsize'.format(self.table)):
+                _, doc_len = decode_fts_varint(doc_rec[1])
+                weight =  (lg2_total_doc_num - math.log(term_rec[2] ,2)) / doc_len
+                csr_modify.execute(self.__sql__['SQL_INSERT_WEIGHT'],
+                                 (term_rec[0], doc_rec[0], weight))
+            pass
+        self.conn.commit()
+        pass
 
     pass
+
+
+def decode_fts_varint(blob):
+    r'''
+    Decode 1 varint and return used bytes and decoded value.
+
+    >>> blob = b'\x7f\x81\x00'
+    >>> decode_fts_varint(blob)
+    (1, 127)
+
+    >>> decode_fts_varint(blob[1:])
+    (2, 128)
+    '''
+    used = 0
+    result = 0
+    for b in blob:
+        b = ord(b)
+        result <<= 7
+        result |= b & ~0x80
+        used += 1
+        if 0 == b & 0x80:
+            break
+        pass
+    return used, result
 
 
 class TextNS(ns):
@@ -143,6 +194,7 @@ class TextNS(ns):
 
         self.__sql__ = dict(
             SQL_CREATE_TBL='''
+            PRAGMA journal_mode=WAL;
             PRAGMA recursive_triggers='ON';
             CREATE VIRTUAL TABLE IF NOT EXISTS {0} USING FTS4(tags);
             CREATE TABLE IF NOT EXISTS {0}_text_id (
@@ -153,6 +205,10 @@ class TextNS(ns):
                 BEGIN
                     DELETE FROM {0} WHERE docid=OLD.rowid;
                 END;
+            CREATE TABLE IF NOT EXISTS {0}_weight (
+                term TEXT NOT NULL,
+                docid TEXT NOT NULL,
+                weight INTEGER NOT NULL);
             ''',
             SQL_INSERT='INSERT OR REPLACE INTO {}_text_id VALUES(?);',
             SQL_UPDATE_1='DELETE FROM {} WHERE docid=?;',
@@ -177,6 +233,11 @@ class TextNS(ns):
             ''',
             SQL_STATS='''
             SELECT term, documents, occurrences FROM {}_terms WHERE col=0;
+            ''',
+            SQL_INSERT_WEIGHT='''
+            INSERT INTO {0}_weight VALUES (?,
+                (SELECT textid from {0}_text_id WHERE rowid = ?),
+            ?)
             '''
         )
 
@@ -243,8 +304,13 @@ class IntNS(ns):
 
         self.__sql__ = dict(
             SQL_CREATE_TBL='''
+            PRAGMA journal_mode=WAL;
             CREATE VIRTUAL TABLE IF NOT EXISTS {0} USING FTS4(tags);
             CREATE VIRTUAL TABLE IF NOT EXISTS {0}_terms USING fts4aux({0});
+            CREATE TABLE IF NOT EXISTS {0}_weight (
+                term TEXT NOT NULL,
+                docid TEXT NOT NULL,
+                weight INTEGER NOT NULL);
             ''',
             SQL_UPDATE_1='DELETE FROM {} WHERE docid=?;',
             SQL_UPDATE_2='INSERT INTO {} (docid, tags) VALUES (?, ?);',
@@ -258,6 +324,7 @@ class IntNS(ns):
             SQL_STATS='''
             SELECT term, documents, occurrences FROM {}_terms WHERE col=0;
             ''',
+            SQL_INSERT_WEIGHT='INSERT INTO {0}_weight VALUES (?, ?, ?)',
         )
 
         self.open_table_(name)
