@@ -112,20 +112,28 @@ class ns(object):
         csr_modify = self.conn.cursor()
         total_doc_num = 0
 
-        for row in csr_term.execute('SELECT value FROM {}_stat'.format(self.table)):
+        sql_sel_docnum = 'SELECT value FROM {}_stat'.format(self.table)
+        sql_sel_stat = __CONSTS__.SQL_STATS.format(self.table)
+        sql_sel_docsize = 'SELECT * from {}_docsize'.format(self.table)
+
+        for row in csr_term.execute(sql_sel_docnum):
             _, total_doc_num = decode_fts_varint(row[0])
 
         lg2_total_doc_num = math.log(total_doc_num, 2)
 
-        csr_modify.execute('DELETE FROM {}_weight'.format(self.table));
+        csr_modify.execute('DELETE FROM {}_weight'.format(self.table))
 
-        for term_rec in csr_term.execute(__CONSTS__.SQL_STATS.format(self.table)):
+        for term_rec in csr_term.execute(sql_sel_stat):
 
-            for doc_rec in csr_docs.execute('SELECT * from {}_docsize'.format(self.table)):
+            for doc_rec in csr_docs.execute(sql_sel_docsize):
                 _, doc_len = decode_fts_varint(doc_rec[1])
-                weight =  (lg2_total_doc_num - math.log(term_rec[2] ,2)) / doc_len
-                csr_modify.execute(self.__sql__['SQL_INSERT_WEIGHT'],
-                                 (term_rec[0], doc_rec[0], weight))
+                weight = (
+                    lg2_total_doc_num - math.log(term_rec[2], 2)
+                ) / doc_len
+                csr_modify.execute(
+                    self.__sql__['SQL_INSERT_WEIGHT'],
+                    (term_rec[0], doc_rec[0], weight)
+                )
             pass
         self.conn.commit()
         pass
