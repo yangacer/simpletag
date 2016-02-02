@@ -162,6 +162,7 @@ class ns(object):
 def tuple_n(tup, n):
     return tup.split()[int(n)]
 
+
 class mad:
 
     def __init__(self):
@@ -175,7 +176,6 @@ class mad:
         return (self.arr[(l - 1)/2] + self.arr[l/2]) / 2.0
 
     def finalize(self):
-        arr_len = len(self.arr)
         self.arr.sort()
         med = self._med_aux()
         self.arr[:] = map(lambda v: v - med, self.arr)
@@ -199,6 +199,7 @@ class stdev:
     def finalize(self):
         avg = self.total / len(self.arr)
         return reduce(lambda s, v: math.pow(v - avg, 2), self.arr, 0)
+
 
 def decode_fts_varint(blob):
     r'''
