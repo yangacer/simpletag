@@ -42,5 +42,13 @@ def weight(name, strid):
     ns.build_weight()
     pass
 
+@main.command()
+@click.option('-n', '--name')
+@click.option('--strid/--no-strid', default=True)
+def balltree(name, strid):
+    ns = simpletag.TextNS(name) if strid else simpletag.IntNS(name)
+    ns.build_balltree()
+    pass
+
 if __name__ == '__main__':
     main()

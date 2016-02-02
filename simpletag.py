@@ -59,6 +59,9 @@ class ns(object):
         conn.row_factory = sqlite3.Row
         self.conn = conn
         self.resolve_supported_level()
+        self.conn.create_aggregate('mad', 1, mad)
+        self.conn.create_aggregate('stdev', 1, stdev)
+        self.conn.create_function('tuple_n', 2, tuple_n)
         pass
 
     def open_table_(self, name):
@@ -129,7 +132,7 @@ class ns(object):
                 _, doc_len = decode_fts_varint(doc_rec[1])
                 weight = (
                     lg2_total_doc_num - math.log(term_rec[2], 2)
-                ) / doc_len
+                ) / math.sqrt(doc_len)
                 csr_modify.execute(
                     self.__sql__['SQL_INSERT_WEIGHT'],
                     (term_rec[0], doc_rec[0], weight)
@@ -138,8 +141,64 @@ class ns(object):
         self.conn.commit()
         pass
 
+    def build_balltree(self):
+        csr = self.conn.cursor()
+        sql = '''
+        SELECT term,
+            CAST (tuple_n(med_div, 0) AS REAL) median
+        FROM (
+            SELECT term, mad(weight) med_div
+            FROM {}_weight GROUP BY term
+        ) ORDER BY CAST (tuple_n(med_div, 1) AS REAL)
+        '''.format(self.table)
+
+        for row in csr.execute(sql):
+            print row
+            pass
+
     pass
 
+
+def tuple_n(tup, n):
+    return tup.split()[int(n)]
+
+class mad:
+
+    def __init__(self):
+        self.arr = []
+
+    def step(self, value):
+        self.arr.append(value)
+
+    def _med_aux(self):
+        l = len(self.arr)
+        return (self.arr[(l - 1)/2] + self.arr[l/2]) / 2.0
+
+    def finalize(self):
+        arr_len = len(self.arr)
+        self.arr.sort()
+        med = self._med_aux()
+        self.arr[:] = map(lambda v: v - med, self.arr)
+        self.arr.sort()
+        # print self.arr
+        return '{} {}'.format(
+            med,
+            self.arr[len(self.arr)/2]
+        )
+
+
+class stdev:
+    def __init__(self):
+        self.arr = []
+        self.total = 0
+
+    def step(self, value):
+        self.total += value
+        self.arr.append(value * value)
+
+    def finalize(self):
+        avg = self.total / len(self.arr)
+        return reduce(lambda s, v: math.pow(v - avg, 2), self.arr, 0)
 
 def decode_fts_varint(blob):
     r'''
